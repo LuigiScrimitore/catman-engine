@@ -60,86 +60,9 @@ sku_gkey_focus = lista_colonne['sku_gkey_focus']
 sku_gkey_sub = lista_colonne['sku_gkey_sub']
 sku_loyalty = lista_colonne['loyalty']
 
-def load_filtered_sales_parquet(filepath, start_date=None, end_date=None):
-    """
-    Carica un file Parquet applicando un filtro temporale prima di leggere in memoria.
-    Args:
-        filepath (str): Percorso del file Parquet.
-        start_date (str, optional): Data di inizio del filtro (es. 'YYYY-MM-DD').
-                                    Se None, non applica un limite inferiore.
-        end_date (str, optional): Data di fine del filtro (es. 'YYYY-MM-DD').
-                                  Se None, non applica un limite superiore.
-
-    Returns:
-        pd.DataFrame: DataFrame contenente solo i dati filtrati.
-    """
-    filters = []
-    filtri = []
-    colonne_da_leggere = [
-        'ART_RADICE_COD', 'PDV_COD', 'CUSTOMER_ID', 'DATA_SCONTRINO',
-        'QUANTITA', 'IMPORTO', 'PROMO_FLAG', 'FIDELITY_FLAG'
-    ]
-
-    if start_date:
-        #filters.append(('DATA_SCONTRINO', '>=', pd.Timestamp(start_date)))
-        # filters.append(('DATA_SCONTRINO', '>=', start_date))
-
-        filtri = [
-            ('PROMO_FLAG', '=', 0),
-            ('DATA_SCONTRINO', '>=', start_date),
-            ('FIDELITY_FLAG', '=', 1),
-            ('CUSTOMER_ID', '!=', '-1')
-        ]
-
-    # if end_date:
-    #     # Per includere l'intero giorno di end_date, dovresti usare il giorno successivo
-    #     # oppure specificare l'ora fino alla fine del giorno corrente.
-    #     # Ad esempio, per '2022-06-30', potresti voler includere fino a '2022-06-30 23:59:59'
-    #     # o filtrare con '<' sul giorno successivo '2022-07-01'
-    #     filters.append(('DATA_SCONTRINO', '<=', pd.Timestamp(end_date) + pd.Timedelta(days=1, microseconds=-1))) # Inclusivo fino alla fine del giorno
-    #     # Oppure in modo più semplice e chiaro: filters.append(('DATA_SCONTRINO', '<', pd.Timestamp(end_date) + pd.Timedelta(days=1)))
-
-
-    print(f"Lettura di '{filepath}' con filtri: {filters}")
-
-    if filtri:
-    # if filters:
-        # Applica i filtri direttamente durante la lettura
-        # df_sales = pd.read_parquet(filepath, filters=filters)
-        df_sales = pd.read_parquet(
-            filepath,
-            columns=colonne_da_leggere,
-            filters=filtri,
-            engine='pyarrow'  # Assicurati di usare pyarrow
-        )
-    else:
-        # Se nessun filtro è specificato, carica l'intero file (non consigliato per file grandi)
-        print("Nessun filtro temporale specificato, caricamento dell'intero file.")
-        df_sales = pd.read_parquet(filepath)
-
-    return df_sales
-
-
-def smart_load_to_pd(fname, sep, decimal, encoding, spec_types=None):
-    _, file_ext = os.path.splitext(fname)
-    if spec_types is None:
-        spec_types = {}
-    if file_ext == ".zip":
-        return pd.read_csv(fname, compression='zip', sep=sep, decimal=decimal, encoding=encoding, dtype=spec_types)
-    elif file_ext == ".parquet":
-        # df = pd.read_parquet(fname)
-        if fname == './data/02.INPUT/SALES/scont_l2y_050.parquet':
-            min_data = '2024-05-04'
-            print('BIG FILE!!!')
-        else:
-            min_data = '2022-01-01'
-        df = load_filtered_sales_parquet(fname, min_data)
-        print(df.shape)
-        # else:
-        #     df = pd.read_parquet(fname)
-        return df
-    else:
-        return pd.read_csv(fname, sep=sep, decimal=decimal, encoding=encoding, dtype=spec_types)
+# load_filtered_sales_parquet e smart_load_to_pd sono state centralizzate
+# in utils/sales_loader.py e sono accessibili tramite utl.smart_load_to_pd
+smart_load_to_pd = utl.smart_load_to_pd
 
 
 def get_customers_without_fidelity(df_buy):
@@ -299,15 +222,7 @@ def process_single_category(cat: str):
     sku_filter = workarea_path + re.sub("/", "", str(cat)) + "/" + sku_filt_file
     cat_group = cat_out + 'grouping' + '_' + str(cat_code).zfill(3) + ".csv"
     cat_loyal = cat_out + 'loyalty' + '_' + str(cat_code).zfill(3) +'.csv'
-    sales_files = []
-    multi_sales = False
-    if os.path.exists(sales_path + "scont_l2y_" + str(cat_code).zfill(3) + ".parquet"):
-        sales_files = [sales_path + "scont_l2y_" + str(cat_code).zfill(3) + ".parquet"]
-    elif os.path.exists(sales_path + "SALES_2Y_CAT" + str(cat_code).zfill(3) + ".csv"):
-        sales_files = [sales_path + "SALES_2Y_CAT" + str(cat_code).zfill(3) + ".csv"]
-    else:
-        sales_files = [sales_path + ff for ff in os.listdir(sales_path) if re.search("SALES_2Y_CAT_" + str(cat_code).zfill(3) + "_GRP.*.csv", ff) is not None]
-        multi_sales = True
+    sales_files, multi_sales = utl.get_sales_files(sales_path, cat_code)
     # print(sales_files)
     if len(sales_files) == 0 or not os.path.exists(sku_filter):
         nosales_cat.append(cat)
@@ -357,7 +272,8 @@ def process_single_category(cat: str):
     # Import sales data
     for ff in sales_files:
         print("loading "+ff)
-        sku_buy = smart_load_to_pd(ff, sep=';', decimal= ",", encoding='latin-1')
+        sku_buy = smart_load_to_pd(ff, sep=';', decimal=",", encoding='latin-1',
+                                   apply_loyalty_filters=True)
         sku_buy = sku_buy[sales_cols2keep]
         print("sku_buy shape: ", sku_buy.shape) #63,989,094
         if (sku_buy[~sku_buy[promo].isna()][promo] == 1).all():
@@ -468,3 +384,4 @@ if __name__ == "__main__":
     process_single_category(current_category)
 
     sys.exit(0)  # Esce indicando successo
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      

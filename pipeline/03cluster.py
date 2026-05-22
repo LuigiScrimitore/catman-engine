@@ -65,64 +65,9 @@ sku_subscore = lista_colonne['sku_subscore']
 sku_group_focus = lista_colonne['sku_group_focus']
 sku_group_sub = lista_colonne['sku_group_sub']
 
-def load_filtered_sales_parquet(filepath, start_date=None, end_date=None):
-    """
-    Carica un file Parquet applicando un filtro temporale prima di leggere in memoria.
-    Args:
-        filepath (str): Percorso del file Parquet.
-        start_date (str, optional): Data di inizio del filtro (es. 'YYYY-MM-DD').
-                                    Se None, non applica un limite inferiore.
-        end_date (str, optional): Data di fine del filtro (es. 'YYYY-MM-DD').
-                                  Se None, non applica un limite superiore.
-
-    Returns:
-        pd.DataFrame: DataFrame contenente solo i dati filtrati.
-    """
-    filters = []
-
-    if start_date:
-        #filters.append(('DATA_SCONTRINO', '>=', pd.Timestamp(start_date)))
-        filters.append(('DATA_SCONTRINO', '>=', start_date))
-    if end_date:
-        # Per includere l'intero giorno di end_date, dovresti usare il giorno successivo
-        # oppure specificare l'ora fino alla fine del giorno corrente.
-        # Ad esempio, per '2022-06-30', potresti voler includere fino a '2022-06-30 23:59:59'
-        # o filtrare con '<' sul giorno successivo '2022-07-01'
-        filters.append(('DATA_SCONTRINO', '<=', pd.Timestamp(end_date) + pd.Timedelta(days=1, microseconds=-1))) # Inclusivo fino alla fine del giorno
-        # Oppure in modo più semplice e chiaro: filters.append(('DATA_SCONTRINO', '<', pd.Timestamp(end_date) + pd.Timedelta(days=1)))
-
-
-    print(f"Lettura di '{filepath}' con filtri: {filters}")
-
-    if filters:
-        # Applica i filtri direttamente durante la lettura
-        df_sales = pd.read_parquet(filepath, filters=filters)
-    else:
-        # Se nessun filtro è specificato, carica l'intero file (non consigliato per file grandi)
-        print("Nessun filtro temporale specificato, caricamento dell'intero file.")
-        df_sales = pd.read_parquet(filepath)
-
-    return df_sales
-
-
-
-def smart_load_to_pd(fname, sep, decimal, encoding, spec_types=None):
-    _, file_ext = os.path.splitext(fname)
-    if spec_types is None:
-        spec_types = {}
-    if file_ext == ".zip":
-        return pd.read_csv(fname, compression='zip', sep=sep, decimal=decimal, encoding=encoding, dtype=spec_types)
-    elif file_ext == ".parquet":
-        #df = pd.read_parquet(fname)
-        if fname=='./data/03.WORKAREA/scont_l2y_050.parquet':
-            min_data = '2024-05-04'
-            df = load_filtered_sales_parquet(fname, min_data)
-        else:
-            df = pd.read_parquet(fname)
-
-        return df
-    else:
-        return pd.read_csv(fname, sep=sep, decimal=decimal, encoding=encoding, dtype=spec_types)
+# load_filtered_sales_parquet e smart_load_to_pd sono state centralizzate
+# in utils/sales_loader.py e sono accessibili tramite utl.smart_load_to_pd
+smart_load_to_pd = utl.smart_load_to_pd
 
 
 def get_customers_without_fidelity(df_buy):
@@ -386,15 +331,7 @@ def process_single_category(cat: str):
             dist_helper.append(info)
         dist_helper = pd.concat(dist_helper)
         #print(dist_helper)
-        sales_files = []
-        multi_sales = False
-        if os.path.exists(sales_path + "scont_l2y_" + str(cat_code).zfill(3) + ".parquet"):
-            sales_files = [sales_path + "scont_l2y_" + str(cat_code).zfill(3) + ".parquet"]
-        elif os.path.exists(sales_path + "SALES_2Y_CAT" + str(cat_code).zfill(3) + ".csv"):
-            sales_files = [sales_path + "SALES_2Y_CAT" + str(cat_code).zfill(3) + ".csv"]
-        else:
-            sales_files = [sales_path + ff for ff in os.listdir(sales_path) if re.search("SALES_2Y_CAT" + str(cat_code).zfill(3) + "_GRP*.csv", ff) is not None]
-            multi_sales = True
+        sales_files, multi_sales = utl.get_sales_files(sales_path, cat_code)
         print(sales_files)
         if len(sales_files) == 0:
             nosales_cat.append(cat)
@@ -449,3 +386,4 @@ if __name__ == "__main__":
 
     # Quando lo script termina, il processo viene distrutto e la memoria liberata.
     sys.exit(0)  # Esce indicando successo
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
