@@ -1,5 +1,11 @@
 import yaml
 
+from utils.sales_loader import (
+    load_filtered_sales_parquet,
+    smart_load_to_pd,
+    get_sales_files,
+)
+
 CONFIG_FILE = "./config/configurazioni.yaml"
 CATEGORIE_FILE = "./config/categorie.yaml"
 DB_FILE = "./config/db_config.yaml"
@@ -40,8 +46,4 @@ def get_DB_Mapping():
     return config_completo.get('output_mapping', {})
 
 def get_PipelineList():
-    return get_config_general(PIPELINE_FILE)['PIPELINE_SCRIPTS']
-
-def get_Conversioni():
-    return get_config_general(CONVERSIONI_FILE)
-
+    return get_config_gen
