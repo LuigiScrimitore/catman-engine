@@ -1,0 +1,90 @@
+ paths:
+   script_path: "./pipeline/"
+   input_path: "./data/02.INPUT/"
+   sales_path: "./data/02.INPUT/SALES/"
+   workarea_path: "./data/03.WORKAREA/"
+   output_path: "./data/04.OUTPUT/"
+#   xlsx_path: "./output/"
+#   data_path: "./input/NEW_dataZipped/"
+#   meta_path: "./data/converted/"
+#   aux_path: "./output/"
+ files:
+   pdv: "LU_PDV_CATMAN.csv"
+   clusters: "LA_DET_CATMAN.csv"
+   metadata: "Metadati.csv"
+   lookup_cats: "SALES_2Y_SUMMARY.csv"
+#   cat_config: "./config/categorie.yaml"
+   sku_filter: "sku_pdv_meta.csv"
+ parameters:
+   tx_filter_promo: True
+   grp_linkage: "ward"
+   grp_cut_threshold: 2000
+   grp_memb_min: 1
+   grp_save_dendro: True
+   grp_debug_sales: False
+   loy_min_count: 10
+   delist_max_score: 5
+   delist_max_cannib: 10
+   augm_min_score: 1
+   augm_max_cannib: 10
+   augm_sales_quants: 5
+   augm_tx_factor: 0.8
+   augm_ot_factor: 0
+   list_min_score: 1
+   list_max_cannib: 10
+   list_min_mkt_rev: 1000
+   list_sales_quants: 5
+   list_tx_factor: 0.8
+   list_ot_factor: 0
+   out_save_hyper: True
+   out_save_excel: False
+   out_save_db: False
+   out_save_csv: True
+ colnames:
+   group_key: "Tipo-Varieta"
+   category: "CATEG_MERC_PDV_DESC"
+   category_meta: "Categoria Merceologica"
+   category_iri: "Categoria"
+   margin_cost: "Margine Costo Netto"
+   margin_sold: "Margine Venduto"
+   sku_score: "PRIORITA' ASSORTIMENTO COMPLESSIVO"
+   segment: "SEGMENTO_DESC"
+   sku_id: "ART_RADICE_COD"
+   sku_id_meta: "Articolo Radice_COD"
+   sku_desc: "ART_RADICE_DESC"
+   sku_desc_meta: "Articolo Radice"
+   cust_id: "CUSTOMER_ID"
+   pdv_id: "PDV_COD"
+   tx_id: "TRANS_ID"
+   tx_date: "DATA_SCONTRINO"
+   sku_status: "ART_STATO_DESC"
+   amount: "IMPORTO"
+   qty: "QUANTITA"
+   fidelity: "FIDELITY_FLAG"
+   promo: "PROMO_FLAG"
+   sku_id_focus: "SKU ID (Focus)"
+   sku_desc_focus: "SKU Name (Focus)"
+   sku_status_focus: "Stato CNO (Focus)"
+   sku_sold_focus: "SKU # Sold (Focus)"
+   sku_cust_focus: "SKU # Customers (Focus)"
+   sku_catcno_focus: "Cat. Merc. CNO (Focus)"
+   sku_catiri_focus: "Categoria IRI (Focus)"
+   sku_seciri_focus: "Settore IRI (Focus)"
+   sku_gkey_focus: "Tipo-Varieta IRI (Focus)"
+   sku_id_sub: "SKU ID (Substitute)"
+   sku_desc_sub: "SKU Name (Substitute)"
+   sku_status_sub: "Stato CNO (Substitute)"
+   sku_sold_sub: "SKU # Sold (Substitute)"
+   sku_cust_sub: "SKU # Customers (Substitute)"
+   sku_catcno_sub: "Cat. Merc. CNO (Substitute)"
+   sku_catiri_sub: "Categoria IRI (Substitute)"
+   sku_seciri_sub: "Settore IRI (Substitute)"
+   sku_gkey_sub: "Tipo-Varieta IRI (Substitute)"
+   sku_subscore: "substitution"
+   sku_group: "Gruppo"
+   sku_group_focus: "Gruppo (Focus)"
+   sku_group_sub: "Gruppo (Substitute)"
+   pop_cluster: "Cluster"
+   loyalty: "loyalty"
+   mkt_revenue: "MKT_AC_Vendite in Valore"
+   mkt_volume: "MKT_AC_Vendite in Volume"

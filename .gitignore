@@ -1,0 +1,53 @@
+# ============================================================
+# catman-engine — .gitignore
+# ============================================================
+
+# --- Ambienti virtuali Python ---
+.venv/
+venv/
+env/
+.env
+
+# --- Cache Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# --- Dati (file di input/output — non versionare) ---
+data/01.FROM_DB/**
+data/02.INPUT/SALES/**
+data/02.INPUT/*.csv
+data/02.INPUT/*.zip
+data/03.WORKAREA/**
+data/04.OUTPUT/**
+
+# Mantieni la struttura delle cartelle vuote
+!data/01.FROM_DB/.gitkeep
+!data/02.INPUT/SALES/.gitkeep
+!data/03.WORKAREA/.gitkeep
+!data/04.OUTPUT/.gitkeep
+
+# Estensioni dati ovunque nel progetto
+*.parquet
+*.hyper
+*.zip
+
+# --- Credenziali DB (SICUREZZA) ---
+config/db_config.yaml
+
+# --- IDE ---
+.idea/
+.vscode/
+*.iml
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Log e temporanei ---
+*.log
+*.tmp
+*.bak

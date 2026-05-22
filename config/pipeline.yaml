@@ -1,0 +1,12 @@
+# Lista degli script da eseguire in ordine per ogni categoria
+PIPELINE_SCRIPTS:
+    - "00metadata.py"
+    - "01prefiltering.py"
+    - "02similarity.py"
+    - "03cluster.py"
+    - "04loyalty.py"
+    - "05delisting.py"
+    - "06aumento.py"
+    - "07listing.py"
+    - "08prepare_totals.py"
+    - "10stimaImpatti.py"

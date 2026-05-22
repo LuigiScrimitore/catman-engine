@@ -1,0 +1,20 @@
+## Configurazione credenziali DB — Copia in db_config.yaml e inserisci i valori reali
+## ATTENZIONE: db_config.yaml è in .gitignore e NON deve essere committato
+
+params:
+  user: 'INSERIRE_UTENTE'
+  password: 'INSERIRE_PASSWORD'
+  host: 'INSERIRE_HOST'
+  port: 1521
+  service_name: 'INSERIRE_SERVICE_NAME'
+  array_size: 100000
+  chunk_size: 500000
+  output_path: "./data/01.FROM_DB/"
+  sales_path: "./data/01.FROM_DB/VENDITE"
+
+tabelle:
+  # Decommentare le tabelle da scaricare
+  # - 'CDT_DWH_ODS.ODS_DMV_BAIN_LU_PDV_CATMAN'
+  # - 'CDT_DWH_ODS.ODS_DMV_BAIN_LU_ART_CATMAN'
+  # - 'CDT_DWH_ODS.ODS_DMV_BAIN_LA_DET_CATMAN'
+  # - 'CDT_DWH_EDW.V_FT_SALES_CATMAN'
